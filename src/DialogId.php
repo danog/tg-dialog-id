@@ -7,6 +7,8 @@ use AssertionError;
 /**
  * Represents the type of a bot API dialog ID.
  *
+ * @psalm-immutable
+ *
  * @api
  */
 enum DialogId
@@ -39,6 +41,8 @@ enum DialogId
     /**
      * Get the type of a dialog using just its bot API dialog ID.
      *
+     * @psalm-pure
+     *
      * @param integer $id Bot API ID.
      */
     public static function getType(int $id): self
@@ -61,6 +65,8 @@ enum DialogId
 
     /**
      * Checks whether the provided bot API ID is a supergroup or channel ID.
+     *
+     * @psalm-pure
      */
     public static function isSupergroupOrChannel(int $id): bool
     {
@@ -69,6 +75,8 @@ enum DialogId
 
     /**
      * Checks whether the provided bot API ID is a chat ID.
+     *
+     * @psalm-pure
      */
     public static function isChat(int $id): bool
     {
@@ -76,6 +84,8 @@ enum DialogId
     }
     /**
      * Checks whether the provided bot API ID is a user ID.
+     *
+     * @psalm-pure
      */
     public static function isUser(int $id): bool
     {
@@ -83,6 +93,8 @@ enum DialogId
     }
     /**
      * Checks whether the provided bot API ID is a secret chat ID.
+     *
+     * @psalm-pure
      */
     public static function isSecretChat(int $id): bool
     {
@@ -91,6 +103,8 @@ enum DialogId
 
     /**
      * Convert MTProto secret chat ID to bot API secret chat ID.
+     *
+     * @psalm-pure
      *
      * @param int $id MTProto secret chat ID
      *
@@ -108,6 +122,8 @@ enum DialogId
     /**
      * Convert bot API secret chat ID to MTProto secret chat ID.
      *
+     * @psalm-pure
+     *
      * @param int $id Bot API secret chat ID
      *
      * @return int MTProto secret chat ID
@@ -124,6 +140,8 @@ enum DialogId
     /**
      * Convert MTProto channel ID to bot API channel ID.
      *
+     * @psalm-pure
+     *
      * @param int $id MTProto channel ID
      */
     public static function fromSupergroupOrChannelId(int $id): int
@@ -137,6 +155,8 @@ enum DialogId
     }
     /**
      * Convert bot API channel ID to MTProto channel ID.
+     *
+     * @psalm-pure
      *
      * @param int $id Bot API channel ID
      */
@@ -152,6 +172,8 @@ enum DialogId
     /**
      * Convert MTProto chat ID to bot API chat ID.
      *
+     * @psalm-pure
+     *
      * @param int $id MTProto chat ID
      */
     public static function fromChatId(int $id): int
@@ -165,6 +187,8 @@ enum DialogId
     }
     /**
      * Convert bot API chat ID to MTProto chat ID.
+     *
+     * @psalm-pure
      *
      * @param int $id Bot API chat ID
      */
@@ -180,6 +204,8 @@ enum DialogId
     /**
      * Convert MTProto user ID to bot API user ID.
      *
+     * @psalm-pure
+     *
      * @param int $id MTProto user ID
      */
     public static function fromUserId(int $id): int
@@ -192,6 +218,8 @@ enum DialogId
     }
     /**
      * Convert bot API user ID to MTProto user ID.
+     *
+     * @psalm-pure
      *
      * @param int $id Bot API user ID
      */
