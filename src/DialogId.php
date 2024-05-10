@@ -1,0 +1,206 @@
+<?php declare(strict_types=1);
+
+namespace danog\DialogId;
+
+use AssertionError;
+
+/**
+ * Represents the type of a bot API dialog ID.
+ *
+ * @api
+ */
+enum DialogId
+{
+    private const ZERO_CHANNEL_ID = -1000000000000;
+    private const ZERO_SECRET_CHAT_ID = -2000000000000;
+
+    private const MAX_USER_ID = (1 << 40) - 1;
+    private const MIN_CHAT_ID = -999_999_999_999;
+    private const MIN_CHANNEL_ID = self::ZERO_CHANNEL_ID - (1000000000000 - (1 << 31));
+    private const MIN_SECRET_CHAT_ID = self::ZERO_SECRET_CHAT_ID - 2147483648;
+
+    /**
+     * Dialog type: user.
+     */
+    case USER;
+    /**
+     * Dialog type: chat.
+     */
+    case CHAT;
+    /**
+     * Dialog type: supergroup or channel, see https://core.telegram.org/api/channel for more info.
+     */
+    case CHANNEL_OR_SUPERGROUP;
+    /**
+     * Dialog type: secret chat.
+     */
+    case SECRET_CHAT;
+
+    /**
+     * Get the type of a dialog using just its bot API dialog ID.
+     *
+     * @param integer $id Bot API ID.
+     */
+    public static function getType(int $id): self
+    {
+        if ($id < 0) {
+            if (self::MIN_CHAT_ID <= $id) {
+                return DialogId::CHAT;
+            }
+            if (self::MIN_CHANNEL_ID <= $id && $id !== self::ZERO_CHANNEL_ID) {
+                return DialogId::CHANNEL_OR_SUPERGROUP;
+            }
+            if (self::MIN_SECRET_CHAT_ID <= $id && $id !== self::ZERO_SECRET_CHAT_ID) {
+                return DialogId::SECRET_CHAT;
+            }
+        } elseif (0 < $id && $id <= self::MAX_USER_ID) {
+            return DialogId::USER;
+        }
+        throw new AssertionError("Invalid ID $id provided!");
+    }
+
+    /**
+     * Checks whether the provided bot API ID is a supergroup or channel ID.
+     */
+    public static function isSupergroupOrChannel(int $id): bool
+    {
+        return self::getType($id) === self::CHANNEL_OR_SUPERGROUP;
+    }
+
+    /**
+     * Checks whether the provided bot API ID is a chat ID.
+     */
+    public static function isChat(int $id): bool
+    {
+        return self::getType($id) === self::CHAT;
+    }
+    /**
+     * Checks whether the provided bot API ID is a user ID.
+     */
+    public static function isUser(int $id): bool
+    {
+        return self::getType($id) === self::USER;
+    }
+    /**
+     * Checks whether the provided bot API ID is a secret chat ID.
+     */
+    public static function isSecretChat(int $id): bool
+    {
+        return self::getType($id) === self::SECRET_CHAT;
+    }
+
+    /**
+     * Convert MTProto secret chat ID to bot API secret chat ID.
+     *
+     * @param int $id MTProto secret chat ID
+     *
+     * @return int Bot API secret chat ID
+     */
+    public static function fromSecretChatId(int $id): int
+    {
+        $id += self::ZERO_SECRET_CHAT_ID;
+        $type = self::getType($id);
+        if ($type !== self::SECRET_CHAT) {
+            throw new AssertionError("Expected a secret chat ID, but produced the following type: ".$type->name);
+        }
+        return $id;
+    }
+    /**
+     * Convert bot API secret chat ID to MTProto secret chat ID.
+     *
+     * @param int $id Bot API secret chat ID
+     *
+     * @return int MTProto secret chat ID
+     */
+    public static function toSecretChatId(int $id): int
+    {
+        $type = self::getType($id);
+        if ($type !== self::SECRET_CHAT) {
+            throw new AssertionError("Expected a secret chat ID, got the following type: ".$type->name);
+        }
+        return $id - self::ZERO_SECRET_CHAT_ID;
+    }
+
+    /**
+     * Convert MTProto channel ID to bot API channel ID.
+     *
+     * @param int $id MTProto channel ID
+     */
+    public static function fromSupergroupOrChannelId(int $id): int
+    {
+        $id = self::ZERO_CHANNEL_ID - $id;
+        $type = self::getType($id);
+        if ($type !== self::CHANNEL_OR_SUPERGROUP) {
+            throw new AssertionError("Expected a supergroup/channel ID, but produced the following type: ".$type->name);
+        }
+        return $id;
+    }
+    /**
+     * Convert bot API channel ID to MTProto channel ID.
+     *
+     * @param int $id Bot API channel ID
+     */
+    public static function toSupergroupOrChannelId(int $id): int
+    {
+        $type = self::getType($id);
+        if ($type !== self::CHANNEL_OR_SUPERGROUP) {
+            throw new AssertionError("Expected a supergroup/channel ID, got the following type: ".$type->name);
+        }
+        return (-$id) + self::ZERO_CHANNEL_ID;
+    }
+
+    /**
+     * Convert MTProto chat ID to bot API chat ID.
+     *
+     * @param int $id MTProto chat ID
+     */
+    public static function fromChatId(int $id): int
+    {
+        $id = -$id;
+        $type = self::getType($id);
+        if ($type !== self::CHAT) {
+            throw new AssertionError("Expected a chat ID, but produced the following type: ".$type->name);
+        }
+        return $id;
+    }
+    /**
+     * Convert bot API chat ID to MTProto chat ID.
+     *
+     * @param int $id Bot API chat ID
+     */
+    public static function toChatId(int $id): int
+    {
+        $type = self::getType($id);
+        if ($type !== self::CHAT) {
+            throw new AssertionError("Expected a chat ID, got the following type: ".$type->name);
+        }
+        return -$id;
+    }
+
+    /**
+     * Convert MTProto user ID to bot API user ID.
+     *
+     * @param int $id MTProto user ID
+     */
+    public static function fromUserId(int $id): int
+    {
+        $type = self::getType($id);
+        if ($type !== self::USER) {
+            throw new AssertionError("Expected a user ID, but produced the following type: ".$type->name);
+        }
+        return $id;
+    }
+    /**
+     * Convert bot API user ID to MTProto user ID.
+     *
+     * @param int $id Bot API user ID
+     */
+    public static function toUserId(int $id): int
+    {
+        $type = self::getType($id);
+        if ($type !== self::USER) {
+            throw new AssertionError("Expected a user ID, got the following type: ".$type->name);
+        }
+        return $id;
+    }
+}
