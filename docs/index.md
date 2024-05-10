@@ -1,9 +1,9 @@
 ---
 description: "A library to work with Telegram bot API dialog IDs"
-title: "danog/tgbot-dialog-id"
+title: "danog/tg-dialog-id"
 
 ---
-# `danog/tgbot-dialog-id`
+# `danog/tg-dialog-id`
 
 A library to work with Telegram bot API dialog IDs
 
