@@ -231,4 +231,21 @@ enum DialogId
         }
         return $id;
     }
+
+    /**
+     * Convert bot API ID to MTProto ID (automatically detecting the correct type).
+     *
+     * @psalm-pure
+     *
+     * @param int $id Bot API dialog ID
+     */
+    public static function toMTProtoId(int $id): int
+    {
+        return match (self::getType($id)) {
+            self::USER => self::toUserId($id),
+            self::CHAT => self::toChatId($id),
+            self::CHANNEL_OR_SUPERGROUP => self::toSupergroupOrChannelId($id),
+            self::SECRET_CHAT => self::toSecretChatId($id)
+        };
+    }
 }

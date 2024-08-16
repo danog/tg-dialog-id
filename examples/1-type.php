@@ -56,4 +56,10 @@ expect(DialogId::isChat(-101374607) === true);
 expect(DialogId::isSupergroupOrChannel(-1001234567890) === true);
 expect(DialogId::isSecretChat(-1999898625393) === true);
 
+// Converts a bot API dialog ID => MTProto ID automatically depending on type
+expect(DialogId::toMTProtoId(-1001234567890) === 1234567890);
+expect(DialogId::toMTProtoId(-123456789) === 123456789);
+expect(DialogId::toMTProtoId(123456789) === 123456789);
+expect(DialogId::toMTProtoId(-1999876543211) === 123456789);
+
 echo "OK!".PHP_EOL;

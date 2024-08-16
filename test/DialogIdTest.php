@@ -30,6 +30,11 @@ final class DialogIdTest extends TestCase
         $this->assertSame(1234567890, DialogId::toSupergroupOrChannelId(-1001234567890));
         $this->assertSame(101374607, DialogId::toSecretChatId(-1999898625393));
 
+        $this->assertSame(101374607, DialogId::toMTProtoId(101374607));
+        $this->assertSame(101374607, DialogId::toMTProtoId(-101374607));
+        $this->assertSame(1234567890, DialogId::toMTProtoId(-1001234567890));
+        $this->assertSame(101374607, DialogId::toMTProtoId(-1999898625393));
+
         $this->assertSame(101374607, DialogId::fromUserId(101374607));
         $this->assertSame(-101374607, DialogId::fromChatId(101374607));
         $this->assertSame(-1001234567890, DialogId::fromSupergroupOrChannelId(1234567890));
