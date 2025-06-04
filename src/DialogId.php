@@ -21,6 +21,8 @@ enum DialogId
     private const MIN_CHANNEL_ID = self::ZERO_CHANNEL_ID - (1000000000000 - (1 << 31));
     private const MIN_SECRET_CHAT_ID = self::ZERO_SECRET_CHAT_ID - 2147483648;
 
+    private const MIN_MINIFORUM_ID = self::MAX_USER_ID+1;
+
     /**
      * Dialog type: user.
      */
@@ -37,6 +39,10 @@ enum DialogId
      * Dialog type: secret chat.
      */
     case SECRET_CHAT;
+    /**
+     * Dialog type: miniforum.
+     */
+    case MINIFORUM;
 
     /**
      * Get the type of a dialog using just its bot API dialog ID.
@@ -57,8 +63,12 @@ enum DialogId
             if (self::MIN_SECRET_CHAT_ID <= $id && $id !== self::ZERO_SECRET_CHAT_ID) {
                 return DialogId::SECRET_CHAT;
             }
-        } elseif (0 < $id && $id <= self::MAX_USER_ID) {
-            return DialogId::USER;
+        } elseif ($id > 0) {
+            if ($id <= self::MAX_USER_ID) {
+                return DialogId::USER;
+            }
+            // TMP
+            return DialogId::MINIFORUM;
         }
         throw new AssertionError("Invalid ID $id provided!");
     }
@@ -71,6 +81,27 @@ enum DialogId
     public static function isSupergroupOrChannel(int $id): bool
     {
         return self::getType($id) === self::CHANNEL_OR_SUPERGROUP;
+    }
+
+    /**
+     * Checks whether the provided bot API ID is a supergroup, channel or miniforum.
+     *
+     * @psalm-pure
+     */
+    public static function isSupergroupOrChannelOrMiniforum(int $id): bool
+    {
+        $t = self::getType($id);
+        return $t === self::CHANNEL_OR_SUPERGROUP || $t === self::MINIFORUM;
+    }
+
+    /**
+     * Checks whether the provided bot API ID is a miniforum.
+     *
+     * @psalm-pure
+     */
+    public static function isMiniforum(int $id): bool
+    {
+        return self::getType($id) === self::MINIFORUM;
     }
 
     /**
@@ -202,6 +233,39 @@ enum DialogId
     }
 
     /**
+     * Convert MTProto miniforum ID to bot API miniforum ID.
+     *
+     * @psalm-pure
+     *
+     * @param int $id MTProto miniforum ID
+     */
+    public static function fromMiniforumId(int $id): int
+    {
+        $id += self::MIN_MINIFORUM_ID;
+        $type = self::getType($id);
+        if ($type !== self::MINIFORUM) {
+            throw new AssertionError("Expected a miniforum ID, but produced the following type: ".$type->name);
+        }
+        return $id;
+    }
+
+    /**
+     * Convert bot API miniforum ID to MTProto miniforum ID.
+     *
+     * @psalm-pure
+     *
+     * @param int $id Bot API miniforum ID
+     */
+    public static function toMiniforumId(int $id): int
+    {
+        $type = self::getType($id);
+        if ($type !== self::MINIFORUM) {
+            throw new AssertionError("Expected a miniforum ID, got the following type: ".$type->name);
+        }
+        return $id - self::MIN_MINIFORUM_ID;
+    }
+
+    /**
      * Convert MTProto user ID to bot API user ID.
      *
      * @psalm-pure
@@ -243,6 +307,7 @@ enum DialogId
     {
         return match (self::getType($id)) {
             self::USER => self::toUserId($id),
+            self::MINIFORUM => self::toMiniforumId($id),
             self::CHAT => self::toChatId($id),
             self::CHANNEL_OR_SUPERGROUP => self::toSupergroupOrChannelId($id),
             self::SECRET_CHAT => self::toSecretChatId($id)
