@@ -23,12 +23,16 @@ Represents the type of a bot API dialog ID.
 
 * `danog\DialogId\DialogId::SECRET_CHAT`: Dialog type: secret chat.
 
+* `danog\DialogId\DialogId::MONOFORUM`: Dialog type: monoforum.
+
 ## Properties
 * `$name`: `string` 
 
 ## Method list:
 * [`getType(integer $id): self`](#getType)
 * [`isSupergroupOrChannel(int $id): bool`](#isSupergroupOrChannel)
+* [`isSupergroupOrChannelOrMonoforum(int $id): bool`](#isSupergroupOrChannelOrMonoforum)
+* [`isMonoforum(int $id): bool`](#isMonoforum)
 * [`isChat(int $id): bool`](#isChat)
 * [`isUser(int $id): bool`](#isUser)
 * [`isSecretChat(int $id): bool`](#isSecretChat)
@@ -38,8 +42,11 @@ Represents the type of a bot API dialog ID.
 * [`toSupergroupOrChannelId(int $id): int`](#toSupergroupOrChannelId)
 * [`fromChatId(int $id): int`](#fromChatId)
 * [`toChatId(int $id): int`](#toChatId)
+* [`fromMonoforumId(int $id): int`](#fromMonoforumId)
+* [`toMonoforumId(int $id): int`](#toMonoforumId)
 * [`fromUserId(int $id): int`](#fromUserId)
 * [`toUserId(int $id): int`](#toUserId)
+* [`toMTProtoId(int $id): int`](#toMTProtoId)
 * [`cases(): array`](#cases)
 
 ## Methods:
@@ -57,6 +64,28 @@ Parameters:
 ### <a name="isSupergroupOrChannel"></a> `isSupergroupOrChannel(int $id): bool`
 
 Checks whether the provided bot API ID is a supergroup or channel ID.
+
+
+Parameters:
+
+* `$id`: `int`   
+
+
+
+### <a name="isSupergroupOrChannelOrMonoforum"></a> `isSupergroupOrChannelOrMonoforum(int $id): bool`
+
+Checks whether the provided bot API ID is a supergroup, channel or monoforum.
+
+
+Parameters:
+
+* `$id`: `int`   
+
+
+
+### <a name="isMonoforum"></a> `isMonoforum(int $id): bool`
+
+Checks whether the provided bot API ID is a monoforum.
 
 
 Parameters:
@@ -168,6 +197,28 @@ Parameters:
 
 
 
+### <a name="fromMonoforumId"></a> `fromMonoforumId(int $id): int`
+
+Convert MTProto monoforum ID to bot API monoforum ID.
+
+
+Parameters:
+
+* `$id`: `int` MTProto monoforum ID  
+
+
+
+### <a name="toMonoforumId"></a> `toMonoforumId(int $id): int`
+
+Convert bot API monoforum ID to MTProto monoforum ID.
+
+
+Parameters:
+
+* `$id`: `int` Bot API monoforum ID  
+
+
+
 ### <a name="fromUserId"></a> `fromUserId(int $id): int`
 
 Convert MTProto user ID to bot API user ID.
@@ -187,6 +238,17 @@ Convert bot API user ID to MTProto user ID.
 Parameters:
 
 * `$id`: `int` Bot API user ID  
+
+
+
+### <a name="toMTProtoId"></a> `toMTProtoId(int $id): int`
+
+Convert bot API ID to MTProto ID (automatically detecting the correct type).
+
+
+Parameters:
+
+* `$id`: `int` Bot API dialog ID  
 
 
 
