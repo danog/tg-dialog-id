@@ -17,11 +17,14 @@ enum DialogId
     private const ZERO_SECRET_CHAT_ID = -2000000000000;
 
     private const MAX_USER_ID = (1 << 40) - 1;
+
     private const MIN_CHAT_ID = -999_999_999_999;
+
     private const MIN_CHANNEL_ID = self::ZERO_CHANNEL_ID - (1000000000000 - (1 << 31));
+
     private const MIN_SECRET_CHAT_ID = self::ZERO_SECRET_CHAT_ID - 2147483648;
 
-    private const MIN_MINIFORUM_ID = self::MAX_USER_ID+1;
+    private const MIN_MONOFORUM_CHANNEL_ID = self::ZERO_CHANNEL_ID - 3000000000000;
 
     /**
      * Dialog type: user.
@@ -40,9 +43,9 @@ enum DialogId
      */
     case SECRET_CHAT;
     /**
-     * Dialog type: miniforum.
+     * Dialog type: monoforum.
      */
-    case MINIFORUM;
+    case MONOFORUM;
 
     /**
      * Get the type of a dialog using just its bot API dialog ID.
@@ -63,12 +66,11 @@ enum DialogId
             if (self::MIN_SECRET_CHAT_ID <= $id && $id !== self::ZERO_SECRET_CHAT_ID) {
                 return DialogId::SECRET_CHAT;
             }
-        } elseif ($id > 0) {
-            if ($id <= self::MAX_USER_ID) {
-                return DialogId::USER;
+            if (self::MIN_MONOFORUM_CHANNEL_ID <= $id) {
+                return DialogId::MONOFORUM;
             }
-            // TMP
-            return DialogId::MINIFORUM;
+        } elseif ($id > 0) {
+            return DialogId::USER;
         }
         throw new AssertionError("Invalid ID $id provided!");
     }
@@ -84,24 +86,24 @@ enum DialogId
     }
 
     /**
-     * Checks whether the provided bot API ID is a supergroup, channel or miniforum.
+     * Checks whether the provided bot API ID is a supergroup, channel or monoforum.
      *
      * @psalm-pure
      */
-    public static function isSupergroupOrChannelOrMiniforum(int $id): bool
+    public static function isSupergroupOrChannelOrMonoforum(int $id): bool
     {
         $t = self::getType($id);
-        return $t === self::CHANNEL_OR_SUPERGROUP || $t === self::MINIFORUM;
+        return $t === self::CHANNEL_OR_SUPERGROUP || $t === self::MONOFORUM;
     }
 
     /**
-     * Checks whether the provided bot API ID is a miniforum.
+     * Checks whether the provided bot API ID is a monoforum.
      *
      * @psalm-pure
      */
-    public static function isMiniforum(int $id): bool
+    public static function isMonoforum(int $id): bool
     {
-        return self::getType($id) === self::MINIFORUM;
+        return self::getType($id) === self::MONOFORUM;
     }
 
     /**
@@ -233,36 +235,36 @@ enum DialogId
     }
 
     /**
-     * Convert MTProto miniforum ID to bot API miniforum ID.
+     * Convert MTProto monoforum ID to bot API monoforum ID.
      *
      * @psalm-pure
      *
-     * @param int $id MTProto miniforum ID
+     * @param int $id MTProto monoforum ID
      */
-    public static function fromMiniforumId(int $id): int
+    public static function fromMonoforumId(int $id): int
     {
-        $id += self::MIN_MINIFORUM_ID;
+        $id = self::ZERO_CHANNEL_ID - $id;
         $type = self::getType($id);
-        if ($type !== self::MINIFORUM) {
-            throw new AssertionError("Expected a miniforum ID, but produced the following type: ".$type->name);
+        if ($type !== self::MONOFORUM) {
+            throw new AssertionError("Expected a monoforum ID, but produced the following type: ".$type->name);
         }
         return $id;
     }
 
     /**
-     * Convert bot API miniforum ID to MTProto miniforum ID.
+     * Convert bot API monoforum ID to MTProto monoforum ID.
      *
      * @psalm-pure
      *
-     * @param int $id Bot API miniforum ID
+     * @param int $id Bot API monoforum ID
      */
-    public static function toMiniforumId(int $id): int
+    public static function toMonoforumId(int $id): int
     {
         $type = self::getType($id);
-        if ($type !== self::MINIFORUM) {
-            throw new AssertionError("Expected a miniforum ID, got the following type: ".$type->name);
+        if ($type !== self::MONOFORUM) {
+            throw new AssertionError("Expected a monoforum ID, got the following type: ".$type->name);
         }
-        return $id - self::MIN_MINIFORUM_ID;
+        return (-$id) + self::ZERO_CHANNEL_ID;
     }
 
     /**
@@ -307,7 +309,7 @@ enum DialogId
     {
         return match (self::getType($id)) {
             self::USER => self::toUserId($id),
-            self::MINIFORUM => self::toMiniforumId($id),
+            self::MONOFORUM => self::toMonoforumId($id),
             self::CHAT => self::toChatId($id),
             self::CHANNEL_OR_SUPERGROUP => self::toSupergroupOrChannelId($id),
             self::SECRET_CHAT => self::toSecretChatId($id)
